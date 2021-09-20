@@ -1,0 +1,2 @@
+/usr/bin/ar qc libSTB_IMAGE.a  CMakeFiles/STB_IMAGE.dir/stb/impl.c.o
+/usr/bin/ranlib libSTB_IMAGE.a
