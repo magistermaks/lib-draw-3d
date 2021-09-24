@@ -8,7 +8,7 @@ void Camera::update() {
 
 	// get cursors position
 	getCursorPos(&x, &y);
-	double delta_x = +1.0f * (cursor.x - x) * this->sensivity;
+	double delta_x = -1.0f * (cursor.x - x) * this->sensivity;
 	double delta_y = -1.0f * (cursor.y - y) * this->sensivity;
 	cursor.x = x;
 	cursor.y = y;
@@ -52,12 +52,12 @@ void Camera::update() {
 
 	if( glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS ) {
 		glm::vec3 vec = glm::cross( this->direction, glm::vec3(0, 1, 0) );
-		this->pos -= glm::normalize(vec) * speed;
+		this->pos += glm::normalize(vec) * speed;
 	}
 
 	if( glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS ) {
 		glm::vec3 vec = glm::cross( this->direction, glm::vec3(0, 1, 0) );
-		this->pos += glm::normalize(vec) * speed;
+		this->pos -= glm::normalize(vec) * speed;
 	}
 
 	this->pos.y -= (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) ? speed : 0;
@@ -105,11 +105,6 @@ glm::vec3& Camera::getRotation() {
 }
 
 glm::mat4 Camera::getView() {
-	glm::vec3 sign = {1, 1, -1};
-
-	glm::vec3 pos = this->pos * sign;
-	glm::vec3 dir = this->direction * sign;
-
-	return glm::lookAt(pos, pos + dir, glm::vec3(0.0f, 1.0f, 0.0f));
+	return glm::lookAt(this->pos, this->pos + this->direction, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
