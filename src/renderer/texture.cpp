@@ -29,8 +29,8 @@ void Texture::resize( int width, int height ) {
 	glTexImage2D( GL_TEXTURE_2D, 0, this->internal, width, height, 0, this->format, this->type, nullptr );
 }
 
-void Texture::bind() {
-	glActiveTexture( GL_TEXTURE0 );
+void Texture::bind(int unit) {
+	glActiveTexture( GL_TEXTURE0 + unit );
 	glBindTexture( GL_TEXTURE_2D, this->tex );
 }
 

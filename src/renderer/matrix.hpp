@@ -9,6 +9,7 @@ class MatrixHelper {
 		static glm::mat4 getModelIdentity();
 		static glm::mat4 getVoxelIdentity();
 		static void uniform( GLint location, glm::mat4& matrix );
+		static void uniform( GLint location, glm::mat3& matrix );
 
 };
 

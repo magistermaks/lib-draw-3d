@@ -17,16 +17,20 @@ int main() {
 
 	// compile shader program
 	ShaderProgram* layer = GLHelper::loadShaderProgram("layer");
-	ShaderProgram* light = GLHelper::loadShaderProgram("phong");
+	ShaderProgram* light = GLHelper::loadShaderProgram("phong"); //gouraud
 	ShaderProgram* source = GLHelper::loadShaderProgram("source");
 
-	GLint loc_projection = light->location("projection");
-	GLint loc_view = light->location("view");
-	GLint loc_model = light->location("model");
-	GLint loc_objectColor = light->location("objectColor");
-	GLint loc_lightColor = light->location("lightColor");
-	GLint loc_lightPos = light->location("lightPos");
-	GLint loc_cameraPos = light->location("viewPos");
+	GLint loc_view_projection = light->location("view_projection_mat");
+	GLint loc_model = light->location("model_mat");
+	GLint loc_normal = light->location("normal_mat");
+	GLint loc_light_color = light->location("light.color");
+	GLint loc_light_source = light->location("light.source");
+	GLint loc_camera_position = light->location("camera");
+
+	GLint loc_texture = light->location("sampler");
+	GLint loc_specular = light->location("material.specular");
+	GLint loc_emissive = light->location("material.emissive");
+	GLint loc_shininess = light->location("material.shininess");
 
 	GLint loc_mvp = source->location("mvp");
 
@@ -39,7 +43,9 @@ int main() {
 
 	auto& renderer = RenderSystem::instance();
 
-	Texture* box = Texture::fromFile("./assets/box.png");
+	Texture* box_texture = Texture::fromFile("./assets/box-texture.png");
+	Texture* box_specular = Texture::fromFile("./assets/box-specular.png");
+	Texture* box_emissive = Texture::fromFile("./assets/box-emissive.png");
 
 	VertexConsumerProvider provider2d;
 	provider2d.attribute(2); // 0 -> pos [x, y]
@@ -111,7 +117,6 @@ int main() {
 		if( key == GLFW_KEY_SPACE && action == GLFW_PRESS ) GLHelper::screenshot("screenshot.png");
 	} );
 
-
 	do {
 
 		x = radius * cos(angle);
@@ -150,23 +155,32 @@ int main() {
 		light->bind(); // uniform
 		renderer.setShader(*light);
 		renderer.setConsumer(consumer3d);
-		renderer.setTexture(*box);
+		renderer.setTexture(*box_texture, 0);
+		renderer.setTexture(*box_specular, 1);
+		renderer.setTexture(*box_emissive, 2);
 
 		glm::mat4 model = MatrixHelper::getModelIdentity();
 		model = glm::scale(model, glm::vec3(10, 10, 10));
 //		model = glm::translate(model, glm::vec3(1, 1, 0));
-		glm::mat4 view = camera.getView();
+		glm::mat4 view = camera.getView(), view_proj = proj * view;
+		glm::mat3 normal = glm::mat3( glm::transpose( glm::inverse( model ) ) );
 
-//		glm::mat4 mvp = proj * camera.getView() * model;
-		MatrixHelper::uniform(loc_projection, proj);
+		MatrixHelper::uniform(loc_view_projection, view_proj);
 		MatrixHelper::uniform(loc_model, model);
-		MatrixHelper::uniform(loc_view, view);
+		MatrixHelper::uniform(loc_normal, normal);
 
-		glm::vec3 cameraPos = camera.getPosition();
+		glm::vec3 camera_position = camera.getPosition();
 
-		glUniform3fv(loc_lightColor, 1, glm::value_ptr(light_color));
-		glUniform3fv(loc_lightPos, 1, glm::value_ptr(light_source));
-		glUniform3fv(loc_cameraPos, 1, glm::value_ptr(cameraPos));
+		glUniform3fv(loc_light_color, 1, glm::value_ptr(light_color));
+		glUniform3fv(loc_light_source, 1, glm::value_ptr(light_source));
+		glUniform3fv(loc_camera_position, 1, glm::value_ptr(camera_position));
+
+		// textures
+		glUniform1i(loc_texture, 0); // unit 0
+		glUniform1i(loc_specular, 1); // unit 1
+		glUniform1i(loc_emissive, 2); // unit 2
+
+		glUniform1f(loc_shininess, 16.0f);
 
 		renderer.draw();
 

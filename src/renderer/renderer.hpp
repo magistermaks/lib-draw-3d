@@ -8,7 +8,7 @@ class RenderSystem {
 
 		VertexConsumer* consumer;
 		ShaderProgram* shader;
-		Texture* texture;
+		Texture* textures[8];
 		GLenum depth;
 
 		RenderSystem();
@@ -20,7 +20,7 @@ class RenderSystem {
 		void operator=( const RenderSystem& ) = delete;
 
 		// modify renderer state
-		void setTexture( Texture& );
+		void setTexture( Texture& texture, int unit = 0 );
 		void setShader( ShaderProgram& );
 		void setConsumer( VertexConsumer& );
 		void setDepthFunc( GLenum depth );

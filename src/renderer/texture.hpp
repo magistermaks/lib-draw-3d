@@ -17,7 +17,7 @@ class Texture {
 
 		void resize( int width, int height );
 
-		void bind();
+		void bind(int unit = 0);
 		GLuint id();
 
 		static Texture* fromFile( const char* path );

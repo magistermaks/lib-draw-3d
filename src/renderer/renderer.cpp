@@ -4,11 +4,10 @@
 RenderSystem::RenderSystem() {
 	this->shader = nullptr;
 	this->consumer = nullptr;
-	this->texture = nullptr;
 }
 
-void RenderSystem::setTexture( Texture& texture ) {
-	this->texture = &texture;
+void RenderSystem::setTexture( Texture& texture, int unit ) {
+	this->textures[unit] = &texture;
 }
 
 void RenderSystem::setShader( ShaderProgram& shader ) {
@@ -96,8 +95,11 @@ void RenderSystem::draw() {
 	assert( this->shader != nullptr );
 	assert( this->consumer != nullptr );
 
-	// bind given texture
-	this->texture->bind();
+	// bind given textures
+	for(int unit = 0; unit < 8; unit ++) {
+		Texture* tex = this->textures[unit];
+		if( tex != nullptr ) tex->bind(unit);
+	}
 
 	// bind vertex buffer
 	this->consumer->bind();

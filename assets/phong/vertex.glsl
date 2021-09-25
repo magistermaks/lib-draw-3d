@@ -1,22 +1,30 @@
 #version 330 core
 
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec2 aUV;
+layout (location = 0) in vec3 vertex_position;
+layout (location = 1) in vec3 vertex_normal;
+layout (location = 2) in vec2 vertex_uv;
 
-out vec3 FragPos;
-out vec3 Normal;
-out vec2 Uv;
+out vec3 position;
+out vec3 normal;
+out vec2 uv;
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+uniform mat4 view_projection_mat;
+uniform mat4 model_mat;
+uniform mat3 normal_mat;
 
-void main()
-{
-	FragPos = vec3(model * vec4(aPos, 1.0));
-	Normal = mat3(transpose(inverse(model))) * aNormal;  
-	Uv = aUV;	
+void main() {
 
-	gl_Position = projection * view * vec4(FragPos, 1.0);
+	/* 
+	 * I'm not 100% sure if normalizing normal
+	 * values in vertex shader is the correct way to do this
+	 * the original code examples i read done this in 
+	 * fragment shaders, but i didn't notice any changes
+	 * after moving it here
+	 */
+	
+	position = vec3(model_mat * vec4(vertex_position, 1.0));
+	normal = normalize(normal_mat * vertex_normal);  
+	uv = vertex_uv;	
+
+	gl_Position = view_projection_mat * vec4(position, 1.0f);
 }

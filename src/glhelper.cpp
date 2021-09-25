@@ -18,7 +18,7 @@ bool GLHelper::init(int width, int height, const char* name) {
 		logger::warn( "GLFW Error: " + std::string(msg) );
 	} ); 
 
-	// glfwWindowHint(GLFW_SAMPLES, 2);
+//	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -60,6 +60,7 @@ bool GLHelper::init(int width, int height, const char* name) {
 
 	// Time to enter the third dimension!
 	glEnable(GL_DEPTH_TEST);
+//	glEnable(GL_MULTISAMPLE);  
 //	glEnable(GL_CULL_FACE);
 
 	// allow to override color if the depth is equal
