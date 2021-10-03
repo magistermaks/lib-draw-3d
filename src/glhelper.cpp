@@ -168,8 +168,10 @@ void GLHelper::vertexAttribute( GLint index, GLint length, GLenum type, GLsizei 
 
 ShaderProgram* GLHelper::loadShaderProgram( std::string name ) {
 	ShaderProgramBuilder builder;
-	bool vertex = builder.compileFile( "assets/" + name + "/vertex.glsl", GL_VERTEX_SHADER );
-	bool fragment = builder.compileFile( "assets/" + name + "/fragment.glsl", GL_FRAGMENT_SHADER );
+	builder.setConstant("MAX_LIGHT_COUNT", "64");
+
+	bool vertex = builder.compileFile( "assets/" + name + "/", "vertex.glsl", GL_VERTEX_SHADER );
+	bool fragment = builder.compileFile( "assets/" + name + "/", "fragment.glsl", GL_FRAGMENT_SHADER );
 
 	if( vertex && fragment ) {
 		

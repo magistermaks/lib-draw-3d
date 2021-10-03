@@ -38,6 +38,10 @@ void RenderSystem::vertex( float x, float y, float z, float u, float v ) {
 	this->consumer->vertex(x, y, z, u, v);
 }
 
+void RenderSystem::submit() {
+	this->consumer->submit();
+}
+
 void RenderSystem::clear() {
 	this->consumer->clear();
 }
@@ -71,6 +75,7 @@ void RenderSystem::drawText( const std::string& text, float x, float y, float si
 		x += w;
 	}
 
+	this->submit();
 	this->draw();
 	this->clear();
 }
@@ -86,6 +91,7 @@ void RenderSystem::drawScreen( Screen& screen ) {
 	this->vertex( -1,  1,  0,  1 );
 	this->vertex(  1, -1,  1,  0 );
 
+	this->submit();
 	this->draw();
 	this->clear();
 }

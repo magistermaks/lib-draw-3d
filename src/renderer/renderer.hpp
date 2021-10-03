@@ -34,6 +34,7 @@ class RenderSystem {
 		void depthMask( bool flag );
 
 		void clear();
+		void submit();
 
 		// render specific elements
 		void drawText( const std::string&, float, float, float, Charset& );

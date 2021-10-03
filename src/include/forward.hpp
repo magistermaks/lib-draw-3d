@@ -16,6 +16,9 @@ class Worldgen;
 class Chunk;
 class ChunkManager;
 class ThreadPool;
+class Light;
+class Context;
+class LightType;
 
 // template forward definitions
 template<typename T> class Octree;

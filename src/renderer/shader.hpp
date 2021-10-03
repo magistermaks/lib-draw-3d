@@ -1,5 +1,6 @@
 #pragma once
 
+#include <renderer/uniform.hpp>
 #include <core.hpp>
 
 class ShaderProgram {
@@ -12,7 +13,12 @@ class ShaderProgram {
 		~ShaderProgram();
 
 		GLuint id();
-		GLuint location(const char*);
+		Uniform location(const char*);
+
+		template<typename T>
+		void set(const char* name, const T& value) {
+			location(name).set(value);
+		}
 
 		void bind();
 };
@@ -21,11 +27,15 @@ class ShaderProgramBuilder {
 
 	private:
 		std::vector<GLuint> shaders;
+		std::unordered_map<std::string, std::string> constants;
 		GLint id;
 
+		std::string parseSource( const std::string& source, std::string& path );
+
 	public:
+		void setConstant( const std::string& name, const std::string& value = "" );
 		bool compileSource( std::string, std::string, GLenum );
-		bool compileFile( std::string, GLenum );
+		bool compileFile( std::string, std::string, GLenum );
 		bool link();
 
 		ShaderProgram* build();

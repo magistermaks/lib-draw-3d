@@ -1,44 +1,31 @@
 #version 330 core
 
-struct Material {
-	sampler2D specular;
-	sampler2D emissive;
-	float shininess;
-};
-
-struct Light {
-	vec3 color;
-	vec3 source;
-};
+#require ../common/light.glsl
+#constant MAX_LIGHT_COUNT
 
 out vec4 color;
 
 in vec3 normal;  
 in vec3 position;  
 in vec2 uv;
-  
+
+uniform int light_count = 2;
 uniform vec3 camera;
 uniform sampler2D sampler;
 uniform Material material;
-uniform Light light;
+uniform Light lights[MAX_LIGHT_COUNT];
 
 void main() {
 
-	vec3 emission = texture(material.emissive, uv).rgb;
+	vec3 specular = texture(material.specular, uv).rgb;
+	vec3 light = texture(material.emissive, uv).rgb;
 
-    // ambient light
-    vec3 ambient = 0.15f * light.color;
-  	
-	// diffuse light
-	vec3 light_direction = normalize(light.source - position);
-	float diff = max(dot(normal, light_direction), 0.0f);
-	vec3 diffuse = diff * light.color;
-    
-	// specular light
-	vec3 view_direction = normalize(camera - position);
-	vec3 reflect_direction = reflect(-light_direction, normal);
-	float spec = pow(max(dot(view_direction, reflect_direction), 0.0), material.shininess);
-	vec3 specular = texture(material.specular, uv).rgb * spec * light.color;
+	for( int i = 0; i < light_count; i ++ ) {
+		
+		light += getLight(lights[i], specular, normal, position, camera, material.shininess);
+
+	}
         
-    color = vec4((ambient + diffuse + specular + emission) * texture(sampler, uv).rgb, 1.0);
+    color = vec4(light * texture(sampler, uv).rgb, 1.0);
 }
+

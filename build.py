@@ -8,7 +8,7 @@ import shutil
 # parse cl args
 parser = argparse.ArgumentParser(description="LibTile3D Builder")
 parser.add_argument("--clean", help="(re-)generate build system", action="store_true")
-parser.add_argument("--run", help="execute given target", nargs='?', default=None, const="world")
+parser.add_argument("--run", help="execute given target", nargs='?', default=None, const="main")
 parser.add_argument("--debug", help="build in debug mode", action="store_true")
 parser.add_argument("--xansi", help="disable ANSI colors", action="store_true")
 parser.add_argument("--list", help="list available targets", action="store_true")
@@ -61,7 +61,9 @@ if not os.path.isdir("build"):
 
 write("Building Target...")
 try:
-	os.remove(main)
+	if args.run is not None:
+		binary = f"build/demo/{args.run}/{main}"
+		os.remove(binary)
 except:
 	pass
 
@@ -70,8 +72,6 @@ os.system(f"cd build && {make}")
 
 # run project when required
 if args.run is not None:
-	binary = f"build/demo/{args.run}/{main}"
-
 	print(f"Executable: './{binary}'")
 	write("Running Target...")
 	os.system(binary)

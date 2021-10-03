@@ -9,8 +9,8 @@ ShaderProgram::~ShaderProgram() {
     glDeleteProgram(this->program);
 }
 
-GLuint ShaderProgram::location( const char* name ) {
-    return glGetUniformLocation(this->program, name);
+Uniform ShaderProgram::location( const char* name ) {
+    return Uniform( glGetUniformLocation(this->program, name) );
 }
 
 GLuint ShaderProgram::id() {
@@ -21,10 +21,63 @@ void ShaderProgram::bind() {
     glUseProgram(this->program);
 }
 
-bool ShaderProgramBuilder::compileSource( std::string source, std::string identifier, GLenum type ) {
+void ShaderProgramBuilder::setConstant( const std::string& name, const std::string& value ) {
+	this->constants[name] = value;
+}
+
+std::string ShaderProgramBuilder::parseSource( const std::string& input, std::string& path ) {
+	
+	std::string command_constant = "#constant ";
+	std::string command_require = "#require ";
+
+	std::stringstream sstr(input);
+	std::string line, source;
+
+	while( std::getline(sstr, line) ) {
+
+		if( !line.compare(0, command_constant.size(), command_constant) ) {
+			std::string constant = line.substr( command_constant.size() );
+
+			try{
+				std::string value = this->constants.at(constant);
+			
+				source += "#define " + constant + " " + value + "\n";
+			}catch(std::out_of_range& err) {
+				logger::warn( "Unknown constant '", constant, "' requested in shader '", path, "'!" );
+			}
+
+			continue;
+		}
+
+		if( !line.compare(0, command_require.size(), command_require) ) {
+			std::string required = line.substr( command_require.size() );
+
+			std::ifstream ifile(path + required, std::ios::in);
+
+			if( ifile.is_open() ) {
+				std::stringstream fsstr;
+				fsstr << ifile.rdbuf();
+				ifile.close();
+
+				source += parseSource(fsstr.str(), path) + "\n";
+			}
+
+			continue;
+		}
+			
+		source += line + "\n";
+	}
+
+	return source;
+
+}
+
+bool ShaderProgramBuilder::compileSource( std::string source, std::string path, GLenum type ) {
     GLint shader = glCreateShader(type);
     GLint result = GL_FALSE;
 	int log_length;
+
+	source = parseSource(source, path);
 
     // compile shader
 	const char* cstr = source.c_str();
@@ -39,21 +92,21 @@ bool ShaderProgramBuilder::compileSource( std::string source, std::string identi
 	if( !result && log_length > 0 ) {
 		std::vector<char> log(log_length + 1);
 		glGetShaderInfoLog(shader, log_length, NULL, &log[0]);
-        logger::error( "Failed to compile OpenGL shader: '", identifier, "'!" );         
+        logger::error( "Failed to compile OpenGL shader: '", path, "'!" );         
 		printf("%s\n", &log[0]);
 		return false;
 	}
         
 	this->shaders.push_back( shader );
-	GLHelper::getError("compile() end");
 
 	return true;
 }
 
-bool ShaderProgramBuilder::compileFile( std::string path, GLenum type ) {
+bool ShaderProgramBuilder::compileFile( std::string path, std::string filename, GLenum type ) {
 
+	std::string fullpath = path + filename;
     std::string source;
-	std::ifstream ifile(path, std::ios::in);
+	std::ifstream ifile(fullpath, std::ios::in);
 
 	if( ifile.is_open() ) {
 		std::stringstream sstr;

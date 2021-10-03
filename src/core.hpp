@@ -17,8 +17,11 @@
 #include "renderer/texture.hpp"
 #include "renderer/vertex.hpp"
 #include "renderer/matrix.hpp"
+#include "renderer/context.hpp"
+#include "renderer/light.hpp"
+#include "renderer/uniform.hpp"
 
-// When adding a file here, remember to add its forward definition to the 'include/forward.hpp' file!
+// When adding a file here, remember to add its forward definition to the 'include/forward.hpp'!
 // Include this file to gain access to all LT3D components, external libraries and macros.
 // If your component is to be used in a header file, it MUST NOT include core.hpp, and can only use headers from the 'include/' directory
 

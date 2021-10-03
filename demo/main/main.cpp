@@ -20,19 +20,24 @@ int main() {
 	ShaderProgram* light = GLHelper::loadShaderProgram("phong"); //gouraud
 	ShaderProgram* source = GLHelper::loadShaderProgram("source");
 
-	GLint loc_view_projection = light->location("view_projection_mat");
-	GLint loc_model = light->location("model_mat");
-	GLint loc_normal = light->location("normal_mat");
-	GLint loc_light_color = light->location("light.color");
-	GLint loc_light_source = light->location("light.source");
-	GLint loc_camera_position = light->location("camera");
+	auto loc_view_projection = light->location("view_projection_mat");
+	auto loc_model = light->location("model_mat");
+	auto loc_normal = light->location("normal_mat");
+	auto loc_1light_color = light->location("lights[0].color");
+	auto loc_1light_source = light->location("lights[0].position");
+	auto loc_1light_type = light->location("lights[0].type");
+	auto loc_2light_color = light->location("lights[1].color");
+	auto loc_2light_source = light->location("lights[1].position");
+	auto loc_2light_type = light->location("lights[1].type");
+	auto loc_camera_position = light->location("camera");
 
-	GLint loc_texture = light->location("sampler");
-	GLint loc_specular = light->location("material.specular");
-	GLint loc_emissive = light->location("material.emissive");
-	GLint loc_shininess = light->location("material.shininess");
+	auto loc_texture = light->location("sampler");
+	auto loc_specular = light->location("material.specular");
+	auto loc_emissive = light->location("material.emissive");
+	auto loc_shininess = light->location("material.shininess");
 
-	GLint loc_mvp = source->location("mvp");
+	auto loc_mvp = source->location("mvp");
+	auto loc_col = source->location("col");
 
 	glm::mat4 proj = glm::perspective(glm::radians(77.5f), (float) width / (float) height, 0.1f, 1000.0f);
 
@@ -102,6 +107,8 @@ int main() {
 	consumer3d.vertex( -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f );
 	consumer3d.vertex( -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f );
 
+	consumer3d.submit();
+
 	Camera camera;
 
 	// move the camera so that we don't start inside a black cube
@@ -125,8 +132,8 @@ int main() {
 
 		if(f) angle += 0.0001f;
 
-		glm::vec3 light_source(x, y, z);
-		glm::vec3 light_color(1, 1, 1);
+		glm::vec3 light_source(x, y, z), light2_source(-x, 5, -z);
+		glm::vec3 light_color(1, 1, 1), light2_color(1, 0.65, 0.55);
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -165,22 +172,26 @@ int main() {
 		glm::mat4 view = camera.getView(), view_proj = proj * view;
 		glm::mat3 normal = glm::mat3( glm::transpose( glm::inverse( model ) ) );
 
-		MatrixHelper::uniform(loc_view_projection, view_proj);
-		MatrixHelper::uniform(loc_model, model);
-		MatrixHelper::uniform(loc_normal, normal);
+		loc_view_projection.set(view_proj);
+		loc_model.set(model);
+		loc_normal.set(normal);
 
 		glm::vec3 camera_position = camera.getPosition();
 
-		glUniform3fv(loc_light_color, 1, glm::value_ptr(light_color));
-		glUniform3fv(loc_light_source, 1, glm::value_ptr(light_source));
-		glUniform3fv(loc_camera_position, 1, glm::value_ptr(camera_position));
+		loc_1light_color.set(light_color);
+		loc_1light_source.set(light_source);
+		loc_1light_type.set(1);
+		loc_2light_color.set(light2_color);
+		loc_2light_source.set(light2_source);
+		loc_2light_type.set(1);
+		loc_camera_position.set(camera_position);
 
 		// textures
-		glUniform1i(loc_texture, 0); // unit 0
-		glUniform1i(loc_specular, 1); // unit 1
-		glUniform1i(loc_emissive, 2); // unit 2
+		loc_texture.set(0); // unit 0
+		loc_specular.set(1); // unit 1
+		loc_emissive.set(2); // unit 2
 
-		glUniform1f(loc_shininess, 16.0f);
+		loc_shininess.set(16.0f);
 
 		renderer.draw();
 
@@ -191,7 +202,17 @@ int main() {
 		model = glm::translate(model, light_source);
 
 		glm::mat4 mvp = proj * view * model;
-		MatrixHelper::uniform(loc_mvp, mvp);
+		loc_mvp.set(mvp);
+		loc_col.set(light_color);
+
+		renderer.draw();
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, light2_source);
+
+		mvp = proj * view * model;
+		loc_mvp.set(mvp);
+		loc_col.set(light2_color);
 
 		renderer.draw();
 

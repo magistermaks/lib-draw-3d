@@ -20,7 +20,6 @@ class VertexConsumer {
 		GLuint vbo, vao;
 
 		ReusableBuffer<float> buffer;
-		bool modified;
 
 	public:
 
@@ -34,18 +33,17 @@ class VertexConsumer {
 
 		template< class... Args, class = trait::are_types_equal< float, Args... > >
 		void vertex( Args... args ) {
-			this->modified = true;
 			this->buffer.push( args... );
 		}
 
 		void clear() {
-			this->modified = true;
 			this->buffer.clear();
 		}
 
 		// prepare and bind OpenGL buffers
 		void bind();
 		long count();
+		void submit();
 
 };
 

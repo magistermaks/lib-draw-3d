@@ -27,4 +27,5 @@ void main() {
 	uv = vertex_uv;	
 
 	gl_Position = view_projection_mat * vec4(position, 1.0f);
+
 }
