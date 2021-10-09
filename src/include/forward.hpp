@@ -22,7 +22,7 @@ class LightType;
 
 // template forward definitions
 template<typename T> class Octree;
-template<typename T> class ReusableBuffer;
+template<typename T> class FastBuffer;
 
 // typedefs
 typedef unsigned char byte;

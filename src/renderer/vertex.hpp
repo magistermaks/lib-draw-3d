@@ -19,7 +19,7 @@ class VertexConsumer {
 
 		GLuint vbo, vao;
 
-		ReusableBuffer<float> buffer;
+		FastBuffer<float> buffer;
 
 	public:
 
@@ -33,7 +33,7 @@ class VertexConsumer {
 
 		template< class... Args, class = trait::are_types_equal< float, Args... > >
 		void vertex( Args... args ) {
-			this->buffer.push( args... );
+			this->buffer.insert( args... );
 		}
 
 		void clear() {

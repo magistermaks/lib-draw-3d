@@ -16,7 +16,6 @@
 #define glfwTerminate dont_use_glfw_terminate_because_it_causes_segfault_on_my_driver_thank_you
 
 // C++
-#include <vector>
 #include <sstream>
 #include <vector>
 #include <fstream>

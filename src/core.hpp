@@ -20,6 +20,7 @@
 #include "renderer/context.hpp"
 #include "renderer/light.hpp"
 #include "renderer/uniform.hpp"
+#include "renderer/storage.hpp"
 
 // When adding a file here, remember to add its forward definition to the 'include/forward.hpp'!
 // Include this file to gain access to all LT3D components, external libraries and macros.

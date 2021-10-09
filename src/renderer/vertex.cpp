@@ -36,7 +36,7 @@ void VertexConsumer::submit() {
 	this->bind();
 	
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, this->buffer.size() * sizeof(float), this->buffer.data(), GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, this->buffer.size(), this->buffer.data(), GL_DYNAMIC_DRAW);
 }
 
 void VertexConsumerProvider::apply() {

@@ -4,33 +4,75 @@
 #include "logger.hpp"
 
 template< typename T >
-class ReusableBuffer {
+class FastBuffer {
 
 	private:
 
 		T* buffer;
-		size_t pos;
-		size_t length;
+		int pos;
+		int length;
+
+	protected:
+
+		void push( T value ) {
+			this->buffer[ this->pos ++ ] = value;
+		}
+
+		template< typename... Args, typename = trait::are_types_equal< T, Args... > >
+		void push( T first, Args... args ) {
+			this->push(first);
+			this->push(args...);
+		}
 
 	public:
 
-		ReusableBuffer( size_t );
-		ReusableBuffer( ReusableBuffer&& );
-		~ReusableBuffer();
-		
-		inline void push( T );
-		inline void push( T*, size_t );
-		void clear();
-		void assert_size( int );
+		FastBuffer( int size = 16 );
+		FastBuffer( FastBuffer&& );
+		~FastBuffer();
 
+		// copy buffer into a new array and return pointer
 		T* copy();
-		T* data();
-		size_t size();
-		bool empty();
 
-		template< class... Args, class = trait::are_types_equal< T, Args... > >
-		void push( T first, Args... args ) {
-			this->assert_size( 1 + sizeof...(args) );
+		// get pointer to internal continous buffer
+		T* data();
+
+		// get internal buffer size in bytes
+		int size();
+
+		// check if this buffer is empty
+		bool empty();
+		
+		// get number of elements in this buffer
+		int count();
+
+		// get current maximum capacity
+		int capacity();
+
+		// clear this buffer
+		void clear();
+		
+		// ensure that `count` elements can be inserted
+		void reserve( int count );
+
+		// get reference of element at `index` to buffer element
+		T& read( int index );
+
+		// write `value` into buffer at `index`
+		void write( int index, T value );
+
+		// remove element at `index` from buffer
+		void remove( int index );
+
+		// insert `value` into the buffer
+		void insert( T value );
+
+		// insert `array` into buffer
+		void insert( T* array, int length );
+
+		// insert multiple elements into buffer
+		template< typename... Args, typename = trait::are_types_equal< T, Args... > >
+		void insert( T first, Args... args ) {
+			this->reserve( 1 + sizeof...(args) );
 			this->push(first);
 			this->push(args...);
 		}
@@ -38,14 +80,14 @@ class ReusableBuffer {
 };
 
 template< typename T >
-ReusableBuffer<T>::ReusableBuffer( size_t length ) {
+FastBuffer<T>::FastBuffer( int length ) {
 	this->pos = 0;
 	this->length = length;
 	this->buffer = (T*) malloc(length * sizeof(T));
 }
 
 template< typename T >
-ReusableBuffer<T>::ReusableBuffer( ReusableBuffer<T>&& buffer ) {
+FastBuffer<T>::FastBuffer( FastBuffer<T>&& buffer ) {
 	this->pos = buffer.pos;
 	this->length = buffer.length;
 	this->buffer = buffer.buffer;
@@ -54,36 +96,58 @@ ReusableBuffer<T>::ReusableBuffer( ReusableBuffer<T>&& buffer ) {
 }
 
 template< typename T >
-ReusableBuffer<T>::~ReusableBuffer() {
+FastBuffer<T>::~FastBuffer() {
 	if( this->buffer != nullptr ) {
 		free(this->buffer);
 	}
 }
 
 template< typename T >
-inline void ReusableBuffer<T>::push( T data ) {
-	this->buffer[ this->pos ++ ] = data;
+T* FastBuffer<T>::copy() {
+	T* buf = new T[this->pos];
+	memcpy(buf, this->buffer, this->pos * sizeof(T));
+
+	return buf;
 }
 
 template< typename T >
-inline void ReusableBuffer<T>::push( T* buffor, size_t length ) {
-	this->assert_size(length);
-	memcpy(this->buffer, buffor, length * sizeof(T));
-
-	this->pos += length;
+T* FastBuffer<T>::data() {
+	return this->buffer;
 }
 
 template< typename T >
-void ReusableBuffer<T>::clear() {
+int FastBuffer<T>::size() {
+	return this->pos * sizeof(T);
+}
+
+template< typename T >
+bool FastBuffer<T>::empty() {
+	return this->pos == 0;
+}
+
+template< typename T >
+int FastBuffer<T>::count() {
+	return this->pos;
+}
+
+template< typename T >
+int FastBuffer<T>::capacity() {
+	return this->length;
+}
+
+template< typename T >
+void FastBuffer<T>::clear() {
 	this->pos = 0;
 }
 
 template< typename T >
-void ReusableBuffer<T>::assert_size( int count ) {
-	if( this->pos + count > this->length ) {
-		size_t new_size = this->length * 2;
+void FastBuffer<T>::reserve( int count ) {
+	while( this->pos + count > this->length ) {
+		int new_size = this->length * 2;
 
+#		if LT3D_VERBOSE_FAST_BUFFER == true
 		logger::info("Buffer ", this, " resized to ", new_size, " (", new_size * sizeof(T), " bytes)");
+#		endif
 
 		this->buffer = (T*) realloc(this->buffer, new_size * sizeof(T));
 		this->length = new_size;
@@ -91,26 +155,32 @@ void ReusableBuffer<T>::assert_size( int count ) {
 }
 
 template< typename T >
-size_t ReusableBuffer<T>::size() {
-	return this->pos;
+T& FastBuffer<T>::read( int index ) {
+	return this->buffer[index];
 }
 
 template< typename T >
-bool ReusableBuffer<T>::empty() {
-	return this->pos == 0;
+void FastBuffer<T>::write( int index, T value ) {
+	return this->buffer[index] = value;
 }
 
 template< typename T >
-T* ReusableBuffer<T>::copy() {
-	size_t size = this->pos + 1;
-	T* buf = new T[size];
-	memcpy(buf, this->buffer, size * sizeof(T));
-
-	return buf;
+void FastBuffer<T>::remove( int index ) {
+	std::copy(this->buffer + index + 1, this->buffer + this->pos, this->buffer + index);
+	this->pos --;
 }
 
 template< typename T >
-T* ReusableBuffer<T>::data() {
-	return this->buffer;
+void FastBuffer<T>::insert( T data ) {
+	this->reserve(1);
+	this->push(data);
+}
+
+template< typename T >
+void FastBuffer<T>::insert( T* array, int length ) {
+	this->reserve(length);
+	memcpy((this->buffer + this->pos), array, length * sizeof(T));
+
+	this->pos += length;
 }
 

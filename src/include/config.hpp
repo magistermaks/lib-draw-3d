@@ -15,3 +15,7 @@
 // setting this to true makes the renderer use a shortcut that can fail on SOME drivers
 #define LT3D_FAST_GLFINISH false
 
+// set to true or false,
+// defines if the fast buffer sould be verbose about its realocations,
+// this can be useful for debugging that little pice of shit
+#define LT3D_VERBOSE_FAST_BUFFER true

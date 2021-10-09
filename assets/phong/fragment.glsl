@@ -1,7 +1,7 @@
-#version 330 core
+#version 460 core
 
 #require ../common/light.glsl
-#constant MAX_LIGHT_COUNT
+
 
 out vec4 color;
 
@@ -13,17 +13,18 @@ uniform int light_count = 2;
 uniform vec3 camera;
 uniform sampler2D sampler;
 uniform Material material;
-uniform Light lights[MAX_LIGHT_COUNT];
+
+layout (std430, binding = 0) buffer lights_buffer {
+	Light lights[];
+};
 
 void main() {
 
 	vec3 specular = texture(material.specular, uv).rgb;
 	vec3 light = texture(material.emissive, uv).rgb;
 
-	for( int i = 0; i < light_count; i ++ ) {
-		
+	for( int i = 0; i < lights.length(); i ++ ) {
 		light += getLight(lights[i], specular, normal, position, camera, material.shininess);
-
 	}
         
     color = vec4(light * texture(sampler, uv).rgb, 1.0);

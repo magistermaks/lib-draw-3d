@@ -1,5 +1,22 @@
 #include <core.hpp>
 
+struct SSBOLight {
+
+	// type == color.w
+
+	glm::vec4 color;
+	glm::vec4 position;
+	glm::vec4 direction;
+	
+	// spotlight cutoff angle
+	float angle_inner;
+	float angle_outer;
+
+	// attenuation
+	float linear;
+	float quadratic;
+};
+
 int main() {
 
 	const int width = 1024;
@@ -109,6 +126,26 @@ int main() {
 
 	consumer3d.submit();
 
+	StorageBuffer<SSBOLight> storage(0);
+
+	storage.push( (SSBOLight) {
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), // color
+		glm::vec4(6.0f, 6.0f, 6.0f, 0.0f), // position
+		glm::vec4(1.0f), // direction (unused)
+		2, 3, // angle (unused)
+		0.022, 0.0019 // attenuation
+	} );
+
+	storage.push( (SSBOLight) {
+		glm::vec4(1, 0.65, 0.55, 1.0f), // color
+		glm::vec4(-6.0f, -6.0f, -6.0f, 0.0f), // position
+		glm::vec4(1.0f), // direction (unused)
+		2, 3, // angle (unused)
+		0.022, 0.0019 // attenuation
+	} );
+
+	storage.submit();
+
 	Camera camera;
 
 	// move the camera so that we don't start inside a black cube
@@ -132,7 +169,7 @@ int main() {
 
 		if(f) angle += 0.0001f;
 
-		glm::vec3 light_source(x, y, z), light2_source(-x, 5, -z);
+		glm::vec4 light_source(x, y, z, 1), light2_source(-x, 5, -z, 1);
 		glm::vec3 light_color(1, 1, 1), light2_color(1, 0.65, 0.55);
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -178,12 +215,11 @@ int main() {
 
 		glm::vec3 camera_position = camera.getPosition();
 
-		loc_1light_color.set(light_color);
-		loc_1light_source.set(light_source);
-		loc_1light_type.set(1);
-		loc_2light_color.set(light2_color);
-		loc_2light_source.set(light2_source);
-		loc_2light_type.set(1);
+		storage.get(0).position = light_source;
+		storage.get(1).position = light2_source;
+
+		storage.submit();
+
 		loc_camera_position.set(camera_position);
 
 		// textures
@@ -193,13 +229,15 @@ int main() {
 
 		loc_shininess.set(16.0f);
 
+		storage.bind();
+
 		renderer.draw();
 
 		source->bind();
 		renderer.setShader(*source);
 
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, light_source);
+		model = glm::translate(model, glm::vec3(light_source));
 
 		glm::mat4 mvp = proj * view * model;
 		loc_mvp.set(mvp);
@@ -208,7 +246,7 @@ int main() {
 		renderer.draw();
 
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, light2_source);
+		model = glm::translate(model, glm::vec3(light2_source));
 
 		mvp = proj * view * model;
 		loc_mvp.set(mvp);

@@ -1,13 +1,13 @@
-#pragma once
-
-#include <include/external.hpp>
-
+//#pragma once
+//
+//#include <include/external.hpp>
+//
 //enum struct LightType : int {
 //	Null   = 0,
 //	Point  = 1,
 //	Spot   = 2,
 //	Global = 3
-//}
+//};
 //
 //class Light {
 //
@@ -26,6 +26,8 @@
 //		float linear;
 //		float quadratic;
 //
+//		bool modified;
+//
 //	public:
 //
 //		Light(LightType type);
@@ -38,4 +40,8 @@
 //		Light& setPosition( const glm::vec3& position );
 //		Light& setDirection( const glm::vec3& direction );
 //
-//}
+//		bool getModified();
+//		void upload(GLint location, GLint index);
+//
+//};
+//
