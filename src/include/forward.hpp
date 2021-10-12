@@ -17,12 +17,12 @@ class Chunk;
 class ChunkManager;
 class ThreadPool;
 class Light;
+enum struct LightType;
 class Context;
-class LightType;
 
 // template forward definitions
 template<typename T> class Octree;
-template<typename T> class FastBuffer;
+template<typename T, class Allocator> class FastBuffer;
 
 // typedefs
 typedef unsigned char byte;

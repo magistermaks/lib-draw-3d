@@ -13,6 +13,10 @@ Uniform ShaderProgram::location( const char* name ) {
     return Uniform( glGetUniformLocation(this->program, name) );
 }
 
+GLuint ShaderProgram::buffer( GLenum interface, const char* name ) {
+	return glGetProgramResourceIndex(this->program, interface, name);
+}
+
 GLuint ShaderProgram::id() {
     return this->program;
 }

@@ -2,7 +2,6 @@
 
 #require ../common/light.glsl
 
-
 out vec4 color;
 
 in vec3 normal;  

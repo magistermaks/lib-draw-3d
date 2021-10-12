@@ -44,6 +44,7 @@ class VertexConsumer {
 		void bind();
 		long count();
 		void submit();
+		void shrink();
 
 };
 

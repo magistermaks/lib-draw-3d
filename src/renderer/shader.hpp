@@ -13,7 +13,8 @@ class ShaderProgram {
 		~ShaderProgram();
 
 		GLuint id();
-		Uniform location(const char*);
+		Uniform location(const char* name);
+		GLuint buffer(GLenum interface, const char* name);
 
 		template<typename T>
 		void set(const char* name, const T& value) {

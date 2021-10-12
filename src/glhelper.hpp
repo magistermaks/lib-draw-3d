@@ -2,6 +2,10 @@
 
 #include <core.hpp>
 
+#define UNSUPPORTED 0
+#define SUPPORTED 1
+#define EXTENSION 2 
+
 namespace GLHelper {
 
 	GLFWwindow* window();
@@ -13,6 +17,8 @@ namespace GLHelper {
 
 	bool init(int, int, const char*);
 	void frame();
+
+	int feature( int major, int minor, GLenum extension );
 
 	// screenshot utilities
 	byte* capture( int*, int* );

@@ -39,6 +39,10 @@ void VertexConsumer::submit() {
 	glBufferData(GL_ARRAY_BUFFER, this->buffer.size(), this->buffer.data(), GL_DYNAMIC_DRAW);
 }
 
+void VertexConsumer::shrink() {
+	this->buffer.shrink();
+}
+
 void VertexConsumerProvider::apply() {
 	int offset = 0, index = 0;
 
