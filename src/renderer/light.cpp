@@ -58,3 +58,15 @@ Light& Light::setDirection( const glm::vec3& direction ) {
 	return *this;
 }
 
+glm::vec4& Light::getDiffuseColor() {
+	return this->diffuse_color;
+}
+
+glm::vec4& Light::getSpecularColor() {
+	return this->specular_color;
+}
+
+glm::vec4& Light::getPosition() {
+	return this->position;
+}
+

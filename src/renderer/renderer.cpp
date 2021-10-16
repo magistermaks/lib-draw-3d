@@ -43,7 +43,7 @@ void RenderSystem::submit() {
 }
 
 void RenderSystem::clear() {
-	this->consumer->clearVertex();
+	this->consumer->clearVertexData();
 }
 
 void RenderSystem::depthTest( bool flag ) {
@@ -114,7 +114,7 @@ void RenderSystem::draw() {
 	this->shader->bind();
 
 	// call OpenGL
-	glDrawArrays(this->consumer->primitive, 0, this->consumer->count());
+	this->consumer->draw();
 }
 
 void RenderSystem::flush() {

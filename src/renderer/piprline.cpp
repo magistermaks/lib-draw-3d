@@ -26,15 +26,15 @@ Pipeline& Pipeline::setTexture(Texture* texture, int unit) {
 
 void Pipeline::bind() {
 	shader->bind();
-}
 
-void Pipeline::draw() {
 	for(int unit = 0; unit < textures.size(); unit ++) {
 		this->textures[unit]->bind(unit);
 	}	
 
 	consumer->bind();
+}
 
-	glDrawArrays(this->consumer->primitive, 0, this->consumer->count());
+void Pipeline::draw() {
+	consumer->draw();
 }
 

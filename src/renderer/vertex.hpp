@@ -23,9 +23,9 @@ struct VertexAttribute {
 
 class VertexConsumer {
 
-	public:
+	private:
 
-		GLuint vbo = 0, ibo = 0, vao;
+		GLuint vbo, ibo, vao;
 
 		FastBuffer<float> vertex_buffer, instance_buffer;
 
@@ -43,6 +43,7 @@ class VertexConsumer {
 		VertexConsumer( VertexConsumer&& consumer );
 		~VertexConsumer();
 
+		// vertex buffer methods
 		template< class... Args, class = trait::are_types_equal< float, Args... > >
 		void vertex( Args... args ) {
 			this->vertex_buffer.insert( args... );
@@ -52,10 +53,24 @@ class VertexConsumer {
 			this->vertex_buffer.from(consumer.vertex_buffer);
 		}
 
-		void clearVertex() {
+		void vertex( float* arr, int length ) {
+			this->vertex_buffer.insert(arr, length);
+		}
+
+		void clearVertexData() {
 			this->vertex_buffer.clear();
 		}
 
+		long vertexCount() {
+			return this->vertex_buffer.size() / this->vertex_length;
+		}
+
+		void submitVertexData() {
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
+			glBufferData(GL_ARRAY_BUFFER, this->vertex_buffer.size(), this->vertex_buffer.data(), GL_DYNAMIC_DRAW);
+		}
+
+		// instance buffer methods
 		template< class... Args, class = trait::are_types_equal< float, Args... > >
 		void instance( Args... args ) {
 			this->instance_buffer.insert( args... );
@@ -65,15 +80,29 @@ class VertexConsumer {
 			this->instance_buffer.from(consumer.instance_buffer);
 		}
 
-		void clearInstance() {
+		void instance( float* arr, int length ) {
+			this->instance_buffer.insert(arr, length);
+		}
+
+		void clearInstanceData() {
 			this->instance_buffer.clear();
+		}
+
+		long instanceCount() {
+			return this->instance_buffer.size() / this->instance_length;
+		}
+
+		void submitInstanceData() {
+			glBindBuffer(GL_ARRAY_BUFFER, ibo);
+			glBufferData(GL_ARRAY_BUFFER, this->instance_buffer.size(), this->instance_buffer.data(), GL_DYNAMIC_DRAW);
 		}
 
 		// prepare and bind OpenGL buffers
 		void bind();
-		long count();
 		void submit();
 		void shrink();
+		void clear();
+		void draw();
 
 };
 

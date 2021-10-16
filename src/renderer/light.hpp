@@ -43,5 +43,9 @@ class Light {
 		Light& setPosition( const glm::vec3& position );
 		Light& setDirection( const glm::vec3& direction );
 
+		glm::vec4& getDiffuseColor();
+		glm::vec4& getSpecularColor();
+		glm::vec4& getPosition();
+
 };
 

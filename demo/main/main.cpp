@@ -121,6 +121,7 @@ int main() {
 	consumer3d.submit();
 
 	consumer3di.vertex(consumer3d);
+	consumer3di.submitVertexData();
 
 	context.addLight(LightType::Point)
 		.setColor(1, 1, 1)
@@ -128,6 +129,10 @@ int main() {
 
 	context.addLight(LightType::Point)
 		.setColor(1, 0.65, 0.55)
+		.setAttenuation(0.014, 0.0007);
+
+	context.addLight(LightType::Point)
+		.setColor(0.60, 1, 0.55)
 		.setAttenuation(0.014, 0.0007);
 
 	// shaded cube pipeline
@@ -163,8 +168,7 @@ int main() {
 
 		if(f) angle += 0.0001f;
 
-		glm::vec3 light_source(x, y, z), light2_source(-x, 5, -z);
-		glm::vec3 light_color(1, 1, 1), light2_color(1, 0.65, 0.55);
+		glm::vec3 light1(x, y, z), light2(-x, 5, -z), light3(12 * cos(angle*1.23), 12 * sin(angle*1.23), sin(angle*1.23) * 6);
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -185,12 +189,13 @@ int main() {
 		renderer.setShader(*layer);
 		renderer.drawText( "FPS: " + std::to_string(fps) + " (avg: " + std::to_string(ms) + "ms)", -1, 1-0.05, 0.04, charset ); 
 
+		glm::mat4 view = camera.getView(), view_proj = proj * view;
+
 		pipeline.bind();
-		//{
+		{
 
 			glm::mat4 model(1.0f);
 			model = glm::scale(model, glm::vec3(10, 10, 10));
-			glm::mat4 view = camera.getView(), view_proj = proj * view;
 			glm::mat3 normal = glm::mat3( glm::transpose( glm::inverse( model ) ) );
 	
 			loc_view_projection.set(view_proj);
@@ -199,8 +204,9 @@ int main() {
 
 			glm::vec3 camera_position = camera.getPosition();
 
-			context.getLight(0).setPosition(light_source);
-			context.getLight(1).setPosition(light2_source);
+			context.getLight(0).setPosition(light1);
+			context.getLight(1).setPosition(light2);
+			context.getLight(2).setPosition(light3);
 
 			context.submit();
 
@@ -213,48 +219,27 @@ int main() {
 
 			loc_shininess.set(16.0f);
 
-		//}
+		}
 		pipeline.draw();
 
-		consumer3di.clearInstance();
+		consumer3di.clearInstanceData();
 
-		{
-			consumer3di.instance(light_color.r, light_color.g, light_color.b);
-			glm::mat4 mvp = proj * view * glm::translate(glm::mat4(1), light_source);
-			float* arr = (float*) &mvp[0];
+		for( int i = 0; i < context.lightCount(); i ++ ) {
+			Light& light = context.peekLight(i);
 
-			consumer3di.instance(*(arr+0 ), *(arr+1 ), *(arr+2 ), *(arr+3 ));
-			consumer3di.instance(*(arr+4 ), *(arr+5 ), *(arr+6 ), *(arr+7 ));
-			consumer3di.instance(*(arr+8 ), *(arr+9 ), *(arr+10), *(arr+11));
-			consumer3di.instance(*(arr+12), *(arr+13), *(arr+14), *(arr+15));
+			glm::vec4& col = light.getDiffuseColor();
+			glm::vec4& pos = light.getPosition();
+			glm::mat4 mvp = view_proj * glm::translate(glm::mat4(1), glm::vec3(pos));
+
+			consumer3di.instance(((float*) &col[0]), 3);
+			consumer3di.instance(((float*) &mvp[0]), 16);
 		}
 
-		{
-			consumer3di.instance(light2_color.r, light2_color.g, light2_color.b);
-			glm::mat4 mvp = proj * view * glm::translate(glm::mat4(1), light2_source);
-			float* arr = (float*) &mvp[0];
-
-			consumer3di.instance(*(arr+0 ), *(arr+1 ), *(arr+2 ), *(arr+3 ));
-			consumer3di.instance(*(arr+4 ), *(arr+5 ), *(arr+6 ), *(arr+7 ));
-			consumer3di.instance(*(arr+8 ), *(arr+9 ), *(arr+10), *(arr+11));
-			consumer3di.instance(*(arr+12), *(arr+13), *(arr+14), *(arr+15));
-		}
-
-		consumer3di.submit();
+		consumer3di.submitInstanceData();
 
 		sources.bind();
-		
-		// custom draw calls, piplies doesn't support instancing yet
-		{
-			for(int unit = 0; unit < sources.textures.size(); unit ++) {
-				sources.textures[unit]->bind(unit);
-			}	
+		sources.draw();
 
-			sources.consumer->bind();
-
-			glDrawArraysInstanced(GL_TRIANGLES, 0, consumer3di.count(), 2);
-		}
-//
 		GLHelper::frame();
 		count ++;
 

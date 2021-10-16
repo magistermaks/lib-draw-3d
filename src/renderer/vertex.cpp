@@ -15,13 +15,20 @@ VertexConsumer::VertexConsumer(GLenum primitive, int vertex_length, int instance
 	: 	primitive(primitive), 
 		vertex_length(vertex_length), 
 		instance_length(instance_length), 
-		vertex_buffer(vertex_length > 0 ? 16 : 0), 
-		instance_buffer(instance_length > 0 ? 16 : 0) {
+		vertex_buffer(16), 
+		instance_buffer(instance_length != 0 ? 16 : 0) {
+
+	vao = 0;
+	vbo = 0;
+	ibo = 0;
 
 	glGenVertexArrays(1, &vao);
-	
-	if(vertex_length > 0) glGenBuffers(1, &vbo);
-	if(instance_length > 0) glGenBuffers(1, &ibo);
+	glGenBuffers(1, &vbo);
+
+	// add instance buffer if requesed
+	if(instance_length != 0) {
+		glGenBuffers(1, &ibo);
+	}
 
 	glBindVertexArray(vao);
 }
@@ -49,29 +56,36 @@ void VertexConsumer::bind() {
 	glBindVertexArray(vao);
 }
 
-long VertexConsumer::count() {
-	return this->vertex_buffer.size() / this->vertex_length;
-}
-
 void VertexConsumer::submit() {
-	this->bind();
-	if( vbo != 0 ) {
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, this->vertex_buffer.size(), this->vertex_buffer.data(), GL_DYNAMIC_DRAW);}
+	this->submitVertexData();
 
 	if( ibo != 0 ) {
-	glBindBuffer(GL_ARRAY_BUFFER, ibo);
-	glBufferData(GL_ARRAY_BUFFER, this->instance_buffer.size(), this->instance_buffer.data(), GL_DYNAMIC_DRAW); }
+		this->submitInstanceData();
+	}
 }
 
 void VertexConsumer::shrink() {
 	this->vertex_buffer.shrink();
+	this->instance_buffer.shrink();
+}
+
+void VertexConsumer::clear() {
+	this->clearInstanceData();
+	this->clearVertexData();
+}
+
+void VertexConsumer::draw() {
+	if( ibo != 0 ) {
+		glDrawArraysInstanced(this->primitive, 0, this->vertexCount(), this->instanceCount());
+	} else {
+		glDrawArrays(this->primitive, 0, this->vertexCount());
+	}
 }
 
 void VertexConsumerProvider::apply(int& index, Consumer profile) {
-	int offset = 0, length = this->profiles[(int) profile].length;
+	int offset = 0, length = profiles[(int) profile].length;
 
-	for( VertexAttribute attribute : this->profiles[(int) profile].attributes ) {
+	for( VertexAttribute attribute : profiles[(int) profile].attributes ) {
 
 		GLHelper::vertexAttribute(
 			index, 
