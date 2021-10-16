@@ -17,8 +17,11 @@ int main() {
 
 	// compile shader program
 	ShaderProgram* layer = GLHelper::loadShaderProgram("layer");
-	ShaderProgram* light = GLHelper::loadShaderProgram("phong");
 	ShaderProgram* source = GLHelper::loadShaderProgram("source");
+
+	Context context;
+
+	ShaderProgram* light = context.loadShader("phong");
 
 	auto loc_view_projection = light->location("view_projection_mat");
 	auto loc_model = light->location("model_mat");
@@ -55,9 +58,22 @@ int main() {
 	VertexConsumerProvider provider3d;
 	provider3d.attribute(3); // 0 -> pos [x, y, z]
 	provider3d.attribute(3); // 1 -> nor [x, y, z] 
-	provider3d.attribute(2); // 1 -> tex [u, v]
+	provider3d.attribute(2); // 2 -> tex [u, v]
 
 	VertexConsumer consumer3d = provider3d.get();
+
+	VertexConsumerProvider provider3di;
+	provider3di.attribute(3); // 0 -> pos [x, y, z]
+	provider3di.attribute(3); // 1 -> nor [x, y, z] 
+	provider3di.attribute(2); // 2 -> tex [u, v]
+	provider3di.target(Consumer::INSTANCE);
+	provider3di.attribute(3); // 3 -> col [r, g, b]
+	provider3di.attribute(4); // 4 -> mvp [a1, b2, c3, d4]
+	provider3di.attribute(4); // 5 -> mvp [a1, b2, c3, d4]
+	provider3di.attribute(4); // 6 -> mvp [a1, b2, c3, d4]
+	provider3di.attribute(4); // 7 -> mvp [a1, b2, c3, d4]
+
+	VertexConsumer consumer3di = provider3di.get();
 
 	consumer3d.vertex( -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f );
 	consumer3d.vertex(  0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f );
@@ -104,7 +120,7 @@ int main() {
 	consumer3d.shrink();
 	consumer3d.submit();
 
-	Context context;
+	consumer3di.vertex(consumer3d);
 
 	context.addLight(LightType::Point)
 		.setColor(1, 1, 1)
@@ -113,6 +129,18 @@ int main() {
 	context.addLight(LightType::Point)
 		.setColor(1, 0.65, 0.55)
 		.setAttenuation(0.014, 0.0007);
+
+	// shaded cube pipeline
+	Pipeline pipeline = Pipeline()
+		.setShader(light)
+		.setConsumer(&consumer3d)
+		.setTexture(box_texture, 0)
+		.setTexture(box_specular, 1)
+		.setTexture(box_emissive, 2);
+
+	Pipeline sources = Pipeline()
+		.setShader(source)
+		.setConsumer(&consumer3di);
 
 	Camera camera;
 	camera.move( glm::vec3(20, 20, 20) );
@@ -154,70 +182,79 @@ int main() {
 		camera.update();
 	
 		renderer.setConsumer(consumer2d);
-		renderer.depthTest(false);
-		renderer.depthMask(false);
 		renderer.setShader(*layer);
 		renderer.drawText( "FPS: " + std::to_string(fps) + " (avg: " + std::to_string(ms) + "ms)", -1, 1-0.05, 0.04, charset ); 
 
-		renderer.depthMask(true);
-		renderer.depthTest(true);
+		pipeline.bind();
+		//{
 
-		light->bind(); // uniform
-		renderer.setShader(*light);
-		renderer.setConsumer(consumer3d);
-		renderer.setTexture(*box_texture, 0);
-		renderer.setTexture(*box_specular, 1);
-		renderer.setTexture(*box_emissive, 2);
+			glm::mat4 model(1.0f);
+			model = glm::scale(model, glm::vec3(10, 10, 10));
+			glm::mat4 view = camera.getView(), view_proj = proj * view;
+			glm::mat3 normal = glm::mat3( glm::transpose( glm::inverse( model ) ) );
+	
+			loc_view_projection.set(view_proj);
+			loc_model.set(model);
+			loc_normal.set(normal);
 
-		glm::mat4 model = MatrixHelper::getModelIdentity();
-		model = glm::scale(model, glm::vec3(10, 10, 10));
-//		model = glm::translate(model, glm::vec3(1, 1, 0));
-		glm::mat4 view = camera.getView(), view_proj = proj * view;
-		glm::mat3 normal = glm::mat3( glm::transpose( glm::inverse( model ) ) );
+			glm::vec3 camera_position = camera.getPosition();
 
-		loc_view_projection.set(view_proj);
-		loc_model.set(model);
-		loc_normal.set(normal);
+			context.getLight(0).setPosition(light_source);
+			context.getLight(1).setPosition(light2_source);
 
-		glm::vec3 camera_position = camera.getPosition();
+			context.submit();
 
-		context.getLight(0).setPosition(light_source);
-		context.getLight(1).setPosition(light2_source);
+			loc_camera_position.set(camera_position);
 
-		context.submit();
+			// textures
+			loc_texture.set(0); // unit 0
+			loc_specular.set(1); // unit 1
+			loc_emissive.set(2); // unit 2
 
-		loc_camera_position.set(camera_position);
+			loc_shininess.set(16.0f);
 
-		// textures
-		loc_texture.set(0); // unit 0
-		loc_specular.set(1); // unit 1
-		loc_emissive.set(2); // unit 2
+		//}
+		pipeline.draw();
 
-		loc_shininess.set(16.0f);
+		consumer3di.clearInstance();
 
-		renderer.draw();
+		{
+			consumer3di.instance(light_color.r, light_color.g, light_color.b);
+			glm::mat4 mvp = proj * view * glm::translate(glm::mat4(1), light_source);
+			float* arr = (float*) &mvp[0];
 
-		source->bind();
-		renderer.setShader(*source);
+			consumer3di.instance(*(arr+0 ), *(arr+1 ), *(arr+2 ), *(arr+3 ));
+			consumer3di.instance(*(arr+4 ), *(arr+5 ), *(arr+6 ), *(arr+7 ));
+			consumer3di.instance(*(arr+8 ), *(arr+9 ), *(arr+10), *(arr+11));
+			consumer3di.instance(*(arr+12), *(arr+13), *(arr+14), *(arr+15));
+		}
 
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, light_source);
+		{
+			consumer3di.instance(light2_color.r, light2_color.g, light2_color.b);
+			glm::mat4 mvp = proj * view * glm::translate(glm::mat4(1), light2_source);
+			float* arr = (float*) &mvp[0];
 
-		glm::mat4 mvp = proj * view * model;
-		loc_mvp.set(mvp);
-		loc_col.set(light_color);
+			consumer3di.instance(*(arr+0 ), *(arr+1 ), *(arr+2 ), *(arr+3 ));
+			consumer3di.instance(*(arr+4 ), *(arr+5 ), *(arr+6 ), *(arr+7 ));
+			consumer3di.instance(*(arr+8 ), *(arr+9 ), *(arr+10), *(arr+11));
+			consumer3di.instance(*(arr+12), *(arr+13), *(arr+14), *(arr+15));
+		}
 
-		renderer.draw();
+		consumer3di.submit();
 
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, light2_source);
+		sources.bind();
+		
+		// custom draw calls, piplies doesn't support instancing yet
+		{
+			for(int unit = 0; unit < sources.textures.size(); unit ++) {
+				sources.textures[unit]->bind(unit);
+			}	
 
-		mvp = proj * view * model;
-		loc_mvp.set(mvp);
-		loc_col.set(light2_color);
+			sources.consumer->bind();
 
-		renderer.draw();
-
+			glDrawArraysInstanced(GL_TRIANGLES, 0, consumer3di.count(), 2);
+		}
+//
 		GLHelper::frame();
 		count ++;
 

@@ -1,6 +1,10 @@
 #version 460 core
 
 #require ../common/light.glsl
+#require ../common/compat.glsl
+
+#constant USE_FALLBACK_STORAGE
+#constant MAX_BUFFER_LENGTH
 
 out vec4 color;
 
@@ -13,8 +17,8 @@ uniform vec3 camera;
 uniform sampler2D sampler;
 uniform Material material;
 
-layout (std430, binding = 0) buffer lights_buffer {
-	Light lights[];
+BUFFER_BLOCK(0) lights_buffer {
+	Light UNLIMITED_ARRAY(lights);
 };
 
 void main() {

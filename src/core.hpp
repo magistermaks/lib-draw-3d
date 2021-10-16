@@ -13,13 +13,13 @@
 #include "util/charset.hpp"
 #include "util/thread_pool.hpp"
 #include "renderer/shader.hpp"
+#include "renderer/context.hpp"
 #include "renderer/renderer.hpp"
 #include "renderer/texture.hpp"
 #include "renderer/vertex.hpp"
-#include "renderer/matrix.hpp"
-#include "renderer/context.hpp"
 #include "renderer/light.hpp"
 #include "renderer/uniform.hpp"
+#include "renderer/pipeline.hpp"
 #include "renderer/buffer/storage.hpp"
 
 // When adding a file here, remember to add its forward definition to the 'include/forward.hpp'!

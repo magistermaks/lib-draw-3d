@@ -43,7 +43,7 @@ void RenderSystem::submit() {
 }
 
 void RenderSystem::clear() {
-	this->consumer->clear();
+	this->consumer->clearVertex();
 }
 
 void RenderSystem::depthTest( bool flag ) {

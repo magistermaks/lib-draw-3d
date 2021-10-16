@@ -161,9 +161,10 @@ void GLHelper::getError( const char* origin ) {
 	std::cout << std::flush;
 }
 
-void GLHelper::vertexAttribute( GLint index, GLint length, GLenum type, GLsizei stride, GLsizei offset, GLsizei size, GLboolean normalize ) {
+void GLHelper::vertexAttribute( GLint index, GLint length, GLenum type, GLsizei stride, GLsizei offset, GLsizei size, GLboolean normalize, GLuint divisor ) {
 	glVertexAttribPointer(index, length, type, normalize, stride * size, (GLvoid*) (long) (offset * size));
 	glEnableVertexAttribArray(index);
+	glVertexAttribDivisor(index, divisor);
 }
 
 ShaderProgram* GLHelper::loadShaderProgram( std::string name ) {

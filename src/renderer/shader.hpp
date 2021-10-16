@@ -1,7 +1,8 @@
 #pragma once
 
+#include <logger.hpp>
 #include <renderer/uniform.hpp>
-#include <core.hpp>
+#include <include/external.hpp>
 
 class ShaderProgram {
 

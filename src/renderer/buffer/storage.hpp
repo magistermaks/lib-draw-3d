@@ -4,9 +4,9 @@
 #include <include/forward.hpp>
 #include <util/buffer.hpp>
 
-#define HAS_SSBO true
-#define HAS_UBO true
-#define MAX_SIZE 1024
+#define HAS_SSBO 1
+#define HAS_UBO 1
+#define MAX_SIZE 128
 
 template< typename T >
 class StorageBuffer {
@@ -33,7 +33,7 @@ class StorageBuffer {
 				type = GL_SHADER_STORAGE_BUFFER;
 			}else{
 				if( !HAS_UBO ) {
-					throw new std::runtime_error("Uniform array fallback not yet implemented!");
+					throw std::runtime_error("Uniform array fallback not yet implemented!");
 				}
 
 				if( size_hint == -1 ) {

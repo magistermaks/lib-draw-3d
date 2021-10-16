@@ -37,6 +37,9 @@ class FastBuffer {
 		// get pointer to internal continous buffer
 		T* data();
 
+		// copy data from other FastBuffer
+		void from(FastBuffer<T, Allocator>& buffer);
+
 		// get internal buffer size in bytes
 		int size();
 
@@ -117,6 +120,11 @@ T* FastBuffer<T, Allocator>::copy() {
 template< typename T, class Allocator >
 T* FastBuffer<T, Allocator>::data() {
 	return this->buffer;
+}
+
+template< typename T, class Allocator >
+void FastBuffer<T, Allocator>::from(FastBuffer<T, Allocator>& buffer) {
+	this->insert(buffer.data(), buffer.count());
 }
 
 template< typename T, class Allocator >

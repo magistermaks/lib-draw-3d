@@ -1,5 +1,6 @@
 #pragma once
 
+#include "shader.hpp"
 #include "light.hpp"
 #include "buffer/storage.hpp"
 #include <include/external.hpp>
@@ -15,8 +16,28 @@ class Context {
 
 		Context() : lights(0) {
 			
-			
+		}
 
+		ShaderProgram* loadShader(const std::string& name) {
+			ShaderProgramBuilder builder;
+
+			// provide constants
+			//builder.setConstant("USE_FALLBACK_STORAGE", "");
+			builder.setConstant("MAX_BUFFER_LENGTH", "128");
+
+			bool vertex = builder.compileFile( "assets/" + name + "/", "vertex.glsl", GL_VERTEX_SHADER );
+			bool fragment = builder.compileFile( "assets/" + name + "/", "fragment.glsl", GL_FRAGMENT_SHADER );
+
+			if( vertex && fragment ) {
+		
+				if( builder.link() ) {
+					logger::info( "Loaded OpenGL shader program: '", name, "'" );
+					return builder.build();
+				}
+
+			}
+
+			throw std::runtime_error("OpenGL shader program failed to load!");
 		}
 
 		Light& addLight( LightType type ) {
