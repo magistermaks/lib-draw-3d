@@ -34,6 +34,7 @@
 #include <utility>
 #include <filesystem>
 #include <condition_variable>
+#include <fstream>
 
 // C
 #include <stdio.h>

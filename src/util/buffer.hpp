@@ -37,6 +37,9 @@ class FastBuffer {
 		// get pointer to internal continous buffer
 		T* data();
 
+		// get pointer to element
+		T* data( int index );
+
 		// copy data from other FastBuffer
 		void from(FastBuffer<T, Allocator>& buffer);
 
@@ -120,6 +123,11 @@ T* FastBuffer<T, Allocator>::copy() {
 template< typename T, class Allocator >
 T* FastBuffer<T, Allocator>::data() {
 	return this->buffer;
+}
+
+template< typename T, class Allocator >
+T* FastBuffer<T, Allocator>::data( int index ) {
+	return this->buffer + index;
 }
 
 template< typename T, class Allocator >

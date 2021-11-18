@@ -12,6 +12,7 @@
 #include "util/trait.hpp"
 #include "util/charset.hpp"
 #include "util/thread_pool.hpp"
+#include "loader/parser.hpp"
 #include "renderer/shader.hpp"
 #include "renderer/context.hpp"
 #include "renderer/renderer.hpp"
