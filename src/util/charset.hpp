@@ -1,6 +1,9 @@
 #pragma once
 
-#include <core.hpp>
+#include <include/external.hpp>
+#include <logger.hpp>
+#include <renderer/texture.hpp>
+#include <loader/resource.hpp>
 
 struct Glyph {
 

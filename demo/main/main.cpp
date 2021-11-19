@@ -2,10 +2,6 @@
 
 int main() {
 
-	ObjParser parser("assets/cube-simple.obj");
-	parser.format(0, 6, 3);
-	parser.load();
-
 	const int width = 1024;
 	const int height = 768;
 
@@ -18,6 +14,8 @@ int main() {
 	}
 	
 	GLFWwindow* window = GLHelper::window();
+
+	auto& cube = Resource::object("assets/cube-simple.obj").get("Cube");
 
 	// compile shader program
 	ShaderProgram* layer = GLHelper::loadShaderProgram("layer");
@@ -49,9 +47,7 @@ int main() {
 
 	auto& renderer = RenderSystem::instance();
 
-	Texture* box_texture = Texture::fromFile("./assets/box-texture.png");
-	Texture* box_specular = Texture::fromFile("./assets/box-specular.png");
-	Texture* box_emissive = Texture::fromFile("./assets/box-emissive.png");
+	Texture* box_texture = Resource::texture("./assets/box-texture.png");
 
 	VertexConsumerProvider provider2d;
 	provider2d.attribute(2); // 0 -> pos [x, y]
@@ -79,8 +75,7 @@ int main() {
 
 	VertexConsumer consumer3di = provider3di.get();
 
-	auto& buffer = parser.get("Cube");
-	consumer3d.vertex( buffer.data(), buffer.count() );
+	consumer3d.vertex(cube.buffer.data(), cube.buffer.count());
 
 	consumer3d.shrink();
 	consumer3d.submit();
@@ -104,9 +99,9 @@ int main() {
 	Pipeline pipeline = Pipeline()
 		.setShader(light)
 		.setConsumer(&consumer3d)
-		.setTexture(box_texture, 0)
-		.setTexture(box_specular, 1)
-		.setTexture(box_emissive, 2);
+		.setTexture(cube.material.diffuse_map, 0)
+		.setTexture(cube.material.specular_map, 1)
+		.setTexture(cube.material.emissive_map, 2);
 
 	Pipeline sources = Pipeline()
 		.setShader(source)
@@ -182,7 +177,7 @@ int main() {
 			loc_specular.set(1); // unit 1
 			loc_emissive.set(2); // unit 2
 
-			loc_shininess.set(16.0f);
+			loc_shininess.set(cube.material.shininess);
 
 		}
 		pipeline.draw();

@@ -1,6 +1,8 @@
 #pragma once
 
-#include <core.hpp>
+#include <include/external.hpp>
+#include <include/forward.hpp>
+#include <logger.hpp>
 
 class Texture {
 
@@ -19,8 +21,6 @@ class Texture {
 
 		void bind(int unit = 0);
 		GLuint id();
-
-		static Texture* fromFile( const char* path );
 
 	public:
 		

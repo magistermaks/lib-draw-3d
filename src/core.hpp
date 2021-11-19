@@ -12,7 +12,6 @@
 #include "util/trait.hpp"
 #include "util/charset.hpp"
 #include "util/thread_pool.hpp"
-#include "loader/parser.hpp"
 #include "renderer/shader.hpp"
 #include "renderer/context.hpp"
 #include "renderer/renderer.hpp"
@@ -22,6 +21,9 @@
 #include "renderer/uniform.hpp"
 #include "renderer/pipeline.hpp"
 #include "renderer/buffer/storage.hpp"
+#include "loader/resource.hpp"
+#include "loader/parser_obj.hpp"
+#include "loader/parser_mtl.hpp"
 
 // When adding a file here, remember to add its forward definition to the 'include/forward.hpp'!
 // Include this file to gain access to all LT3D components, external libraries and macros.

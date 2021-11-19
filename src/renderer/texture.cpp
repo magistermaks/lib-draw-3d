@@ -46,24 +46,6 @@ int Texture::getHeight() {
 	return this->height;
 }
 
-Texture* Texture::fromFile( const char* path ) {
-
-	int w, h, n;
-	byte* data = stbi_load(path, &w, &h, &n, 4);
-
-	if( data == nullptr ) {
-		throw std::runtime_error("Failed to load image: '" + std::string(path) + "'");
-	}
-
-	Texture* texture = new Texture( w, h, GL_RGBA, GL_RGBA );
-	texture->update( data );
-
-	stbi_image_free(data);
-
-	return texture;
-
-}
-
 Screen::Screen( int width, int height ) : Texture( width, height, GL_RGBA, GL_RGBA32F, GL_FLOAT ) {
 	// noop
 }

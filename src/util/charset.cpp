@@ -3,7 +3,7 @@
 
 Charset::Charset( const char* path, int size ) {
 
-	this->tex = Texture::fromFile(path);
+	this->tex = Resource::texture(path);
 
 	const int w = this->tex->getWidth();
 	const int h = this->tex->getHeight();

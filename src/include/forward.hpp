@@ -19,6 +19,8 @@ class ThreadPool;
 class Light;
 enum struct LightType;
 class Context;
+class Parser;
+class ObjParser;
 
 // template forward definitions
 template<typename T> class Octree;
