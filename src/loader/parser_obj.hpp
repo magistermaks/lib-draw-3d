@@ -29,6 +29,7 @@ class ObjParser : public Parser {
 
 		float vertex[8];
 		int offset[3];
+		int vsize = 8;
 
 		static glm::vec3 cast3f( std::vector<std::string>& parts, const int offset ) {
 			return glm::vec3( std::stof(parts[offset + 0]), std::stof(parts[offset + 1]), std::stof(parts[offset + 2]) );
@@ -66,10 +67,11 @@ class ObjParser : public Parser {
 			return *current;
 		}
 
-		void format(int v, int t, int n) {
+		void format(int v, int t, int n, int size = 8) {
 			offset[0] = v;
 			offset[1] = t;
 			offset[2] = n;
+			vsize = size;
 		}
 
 	protected:

@@ -8,7 +8,7 @@ int main() {
 	// print cwd, nice for debugging
 	logger::info("Current working directory: '", std::filesystem::current_path().string(), "'");
 
-	// initilize GLFW, GLEW, OpenGL, and OpenCL
+	// initilize GLFW, GLEW, OpenGL
 	if( !GLHelper::init(width, height, "Ring Demo") ) {
 		return -1;
 	}
@@ -46,8 +46,6 @@ int main() {
 	long count = 0, fps = 0, ms = 0;
 
 	auto& renderer = RenderSystem::instance();
-
-	Texture* box_texture = Resource::texture("./assets/box-texture.png");
 
 	VertexConsumerProvider provider2d;
 	provider2d.attribute(2); // 0 -> pos [x, y]

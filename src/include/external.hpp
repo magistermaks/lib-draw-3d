@@ -41,16 +41,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef WIN32 
-#	define NOMINMAX
-#	include <windows.h>
-#	include <direct.h>
-#	define CWD_MAX_PATH MAX_PATH
-#	define POSIX_GETCWD _getcwd
-#else
-#	include <unistd.h>
-#	include <sys/stat.h>
-#	define CWD_MAX_PATH PATH_MAX
-#	define POSIX_GETCWD getcwd
-#endif
+//#ifdef WIN32 
+//#	define NOMINMAX
+//#	include <windows.h>
+//#	include <direct.h>
+//#else
+//#	include <unistd.h>
+//#	include <sys/stat.h>
+//#endif
 

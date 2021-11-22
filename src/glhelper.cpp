@@ -57,8 +57,7 @@ bool GLHelper::init(int width, int height, const char* name) {
 	glEnable(GL_DEPTH_TEST);
 //	glEnable(GL_MULTISAMPLE);
 
-	// TODO get better model so that i can enable this  
-//	glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 
 	// allow to override color if the depth is equal
 	renderer.setDepthFunc(GL_LEQUAL);

@@ -33,7 +33,7 @@ void ObjParser::handle( std::vector<std::string>& parts, int line ) {
 				face(j, std::stoi(vec[j]));
 			}
 
-			current->buffer.insert(this->vertex, 8);
+			current->buffer.insert(this->vertex, vsize);
 			vec.clear();
 		}
 	}else

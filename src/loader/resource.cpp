@@ -51,7 +51,7 @@ MtlParser& Resource::material(const std::string& path) {
 	return mtls[key];
 }
 
-ObjParser& Resource::object(const std::string& path) {
+ObjParser& Resource::object(const std::string& path, long format) {
 	
 	const std::string& key = std::filesystem::canonical(path).string();
 	auto it = objs.find(key);
@@ -63,7 +63,12 @@ ObjParser& Resource::object(const std::string& path) {
 	logger::info("Loading resource: ", key);
 
 	objs.emplace(key, path);
-	objs[key].format(0, 6, 3);
+	objs[key].format(
+		LD3D_OBJ_DEFORMAT_V(format),
+		LD3D_OBJ_DEFORMAT_T(format),
+		LD3D_OBJ_DEFORMAT_N(format),
+		LD3D_OBJ_DEFORMAT_S(format)
+	);
 	objs[key].load();
 
 	return objs[key];

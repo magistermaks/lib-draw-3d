@@ -1,6 +1,6 @@
 #pragma once
 
-// simple forward definitions
+// forward definitions
 class MatrixHelper;
 class Screen;
 class Camera;
@@ -21,6 +21,7 @@ enum struct LightType;
 class Context;
 class Parser;
 class ObjParser;
+class MtlParser;
 
 // template forward definitions
 template<typename T> class Octree;
